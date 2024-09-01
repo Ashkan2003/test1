@@ -1,23 +1,63 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+interface FormData {
+  fullName: string;
+  email: string;
+  date: string;
+  password: string;
+  confirmPassword: string;
+  receiveMessageCheckBox: boolean;
+  gender: "male" | "female";
+}
+
+const schema = z
+  .object({
+    fullName: z
+      .string({ required_error: "وارد کردن این فیلد اجباری است" })
+      .min(3, { message: "حداقل سه کاراکتر برای فیلد نام لازم است" }),
+    email: z.string().email({ message: "فرمت ایمیل باید درست باشد." }),
+    date: z
+      .string()
+      .regex(/^(\d{4}\/(0[1-9]|1[012])\/(0[1-9]|[12][0-9]|3[01]))/, {
+        message: "فرمت تاریخ تولد صحیح نمیباشد",
+      }),
+    password: z
+      .string()
+      .min(8, { message: "حداقل رمز عبور باید 8 کاراکتر باشد." }),
+    confirmPassword: z
+      .string()
+      .min(8, { message: "حداقل رمز عبور باید 8 کاراکتر باشد." }),
+    receiveMessageCheckBox: z.boolean(),
+    gender: z.enum(["male", "female"]),
+  })
+  .refine((data) => data.password == data.confirmPassword, {
+    message: "این فیلد با فیلد پسورد همخوانی ندارد.",
+    path: ["confirmPassword"],
+  });
 
 export default function Home() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: { receiveMessageCheckBox: false, gender: "male" },
+    resolver: zodResolver(schema),
+  });
+
   //states
-  const [isValid, setValid] = useState<boolean>(true);
-  const [personName, setPersonName] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
   // form submit functionality
-  function handleFormSubmit(formData: FormData) {
-    let personName = formData.get("name");
-    if (personName == "") {
-      setValid(false);
-      return;
-    }
-    // form submit code
-  }
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    console.log(data);
+  };
 
   // toggle the password-field visibility
   function handleTogglePasswordVisibility() {
@@ -28,15 +68,6 @@ export default function Home() {
   function handleToggleConfirmPasswordVisibility() {
     setShowConfirmPassword((showConfirmPassword) => !showConfirmPassword);
   }
-
-  //
-  useEffect(() => {
-    if (personName == "") {
-      setValid(false);
-    } else {
-      setValid(true);
-    }
-  }, [personName]);
 
   return (
     <div dir="rtl" className="">
@@ -53,7 +84,7 @@ export default function Home() {
       </div>
       {/* dashboard form */}
       <div className="flex justify-center">
-        <form className="space-y-20" action={handleFormSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-20">
           {/* inputs */}
           <div className="grid  grid-cols-1 md:grid-cols-2 gap-x-32 gap-y-6">
             {/* name-field */}
@@ -62,21 +93,16 @@ export default function Home() {
                 نام و نام خانوادگی (نام مستعار)
               </label>
               <input
-                value={personName}
-                onChange={(e) => setPersonName(e.target.value)}
-                name="name"
                 type="text"
-                id="name"
                 className=" border border-gray-300  placeholder: text-xs rounded-md focus:ring-stone-600 focus:border-stone-600 block w-full  p-2.5"
                 placeholder="نام و نام خانوادگی خود را وارد کنید"
+                {...register("fullName")}
               />
-              <p
-                className={` left-0 mt-1 text-[10px] text-stone-600 ${
-                  isValid ? "hidden" : "absolute"
-                } `}
-              >
-                وارد کردن این فیلد اجباری است
-              </p>
+              {errors.fullName?.message && (
+                <p className=" left-0 mt-1 text-[10px] text-stone-600">
+                  {errors.fullName.message}
+                </p>
+              )}
             </div>
             {/* email-field */}
             <div className="w-[17rem]">
@@ -88,7 +114,13 @@ export default function Home() {
                 id="email"
                 className=" border border-gray-300  placeholder: text-xs rounded-md focus:ring-stone-600 focus:border-stone-600 block w-full  p-2.5"
                 placeholder="آدرس ایمیل خود را وارد کنید"
+                {...register("email")}
               />
+              {errors.email?.message && (
+                <p className=" left-0 mt-1 text-[10px] text-stone-600">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             {/* date-field */}
             <div className="w-[17rem] ">
@@ -107,8 +139,14 @@ export default function Home() {
                   id="date"
                   className=" border border-gray-300  placeholder: text-xs rounded-md focus:ring-stone-600 focus:border-stone-600 block w-full  p-2.5"
                   placeholder="تاریخ تولد خود را انتخاب کنید"
+                  {...register("date")}
                 />
               </div>
+              {errors.date?.message && (
+                <p className=" left-0 mt-1 text-[10px] text-stone-600">
+                  {errors.date.message}
+                </p>
+              )}
             </div>
             {/* password-field */}
             <div className="w-[17rem]">
@@ -138,8 +176,14 @@ export default function Home() {
                   id="password"
                   className=" border border-gray-300  placeholder: text-xs rounded-md focus:ring-stone-600 focus:border-stone-600 block w-full  p-2.5"
                   placeholder="رمز عبور خود را وارد کنید"
+                  {...register("password")}
                 />
               </div>
+              {errors.password?.message && (
+                <p className=" left-0 mt-1 text-[10px] text-stone-600">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
             {/* gender */}
             <div className="order-1 md:order-none">
@@ -148,26 +192,44 @@ export default function Home() {
                 {/* male-btn */}
                 <button
                   type="button"
-                  className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer  px-5 py-2"
+                  className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer"
                 >
-                  <img
-                    src="/imgs/male.png"
-                    alt="male-pic"
-                    className="w-[40px]"
-                  />
-                  <p>مرد</p>
+                  <label htmlFor="gender-option-male" className="px-5 py-2">
+                    <input
+                      value="male"
+                      type="radio"
+                      id="gender-option-male"
+                      hidden
+                      {...register("gender")}
+                    />
+                    <img
+                      src="/imgs/male.png"
+                      alt="male-pic"
+                      className="w-[40px]"
+                    />
+                    <p>مرد</p>
+                  </label>
                 </button>
                 {/* female-btn */}
                 <button
                   type="button"
-                  className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer  px-5 py-2"
+                  className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer  "
                 >
-                  <img
-                    src="/imgs/female.png"
-                    alt="male-pic"
-                    className="w-[40px]"
-                  />
-                  <p>مرد</p>
+                  <label htmlFor="gender-option-female" className="px-5 py-2">
+                    <input
+                      value="female"
+                      type="radio"
+                      id="gender-option-female"
+                      hidden
+                      {...register("gender")}
+                    />
+                    <img
+                      src="/imgs/female.png"
+                      alt="male-pic"
+                      className="w-[40px]"
+                    />
+                    <p>زن</p>
+                  </label>
                 </button>
               </div>
             </div>
@@ -204,19 +266,26 @@ export default function Home() {
                     id="confirm-password"
                     className=" border border-gray-300  placeholder: text-xs rounded-md focus:ring-stone-600 focus:border-stone-600 block w-full  p-2.5"
                     placeholder="رمز عبور خود را تایید کنید"
+                    {...register("confirmPassword")}
                   />
                 </div>
+                {errors.confirmPassword?.message && (
+                  <p className=" left-0 mt-1 text-[10px] text-stone-600">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
               </div>
               {/* checkBox */}
               <div className="flex  items-center">
                 <label
                   className="relative flex items-center rounded-full cursor-pointer"
-                  htmlFor="checkbox"
+                  htmlFor="checkBox"
                 >
                   <input
                     type="checkbox"
                     className="before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:bg-yellow-400 checked:before:bg-gray-900 hover:before:opacity-1"
-                    id="checkbox"
+                    id="checkBox"
+                    {...register("receiveMessageCheckBox")}
                   />
                   <span className="absolute text-white transition-opacity opacity-0 pointer-events-none top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 peer-checked:opacity-100">
                     <svg
