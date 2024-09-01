@@ -75,11 +75,14 @@ export default function Home() {
       <div className="flex justify-center py-10">
         <div className="relative">
           <img src="/imgs/Rectangle 1.svg" className="w-24" alt="account-pic" />
-          <img
-            src="/imgs/plus-circle.svg"
-            className="absolute w-6 right-0 -bottom-1 "
-            alt="account-add-pic"
-          />
+          <label htmlFor="file-btn">
+            <img
+              className="absolute w-6 right-0 -bottom-1 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-[200px] transition-all cursor-pointer"
+              src="/imgs/plus-circle.svg"
+              alt="account-add-pic"
+            />
+            <input type="file" id="file-btn" hidden />
+          </label>
         </div>
       </div>
       {/* dashboard form */}
