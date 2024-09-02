@@ -2,13 +2,14 @@
 "use client";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
+import { object, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormData } from "@/types/formTypes";
 import ProfilePicture from "./components/ProfilePicture";
 import FormSubmitBtn from "./components/FormSubmitBtn";
 import GenderOptions from "./components/GenderOptions";
-import { json } from "stream/consumers";
+import { FormValuesType } from "@/types/formTypes";
+
+const FETCH_URL = "";
 
 // zod validation
 const schema = z
@@ -48,7 +49,7 @@ export default function Home() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormValuesType>({
     defaultValues: {
       receiveMessageCheckBox: false,
       gender: "male",
@@ -57,15 +58,21 @@ export default function Home() {
   });
 
   // form submit functionality
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const reader = new FileReader()
-
-
-    const formData = data;
-    const userProfileImgFile = data.profileImg[0];
-    console.log(userProfileImgFile);
-    formData.profileImg = JSON.stringify(userProfileImgFile);
-    console.log(JSON.stringify(formData));
+  const onSubmit: SubmitHandler<FormValuesType> = async (data) => {
+    console.log(data, "form-data");
+    //fetch
+    await fetch(FETCH_URL, {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.errors) {
+          alert(data.errors);
+        } else {
+          console.log(data);
+        }
+      });
   };
 
   // toggle the password-field visibility

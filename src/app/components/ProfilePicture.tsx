@@ -10,9 +10,7 @@ const ProfilePicture = ({ register }: Props) => {
   const [profileSrc, setProfileSrc] = useState<string>("/imgs/Rectangle 1.svg");
 
   // upload-file functonality
-  function handleUploadFile(event: any) {
-    const file = event.target.files[0];
-
+  function handleUploadFile(file: any) {
     const urlImage = URL.createObjectURL(file);
 
     setProfileSrc(urlImage);
@@ -29,12 +27,13 @@ const ProfilePicture = ({ register }: Props) => {
             alt="account-add-pic"
           />
           <input
+            accept="image/*"
             type="file"
             id="file-btn"
             hidden
             {...register("profileImg", {
-              onChange(event:any) {
-                handleUploadFile(event);
+              onChange(event: any) {
+                handleUploadFile(event.target.files[0]);
               },
             })}
           />
