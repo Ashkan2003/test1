@@ -1,4 +1,4 @@
-export interface FormValuesType {
+export interface FormValuesType extends FormData {
   fullName: string;
   email: string;
   date: string;

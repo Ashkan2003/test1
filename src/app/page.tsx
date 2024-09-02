@@ -9,7 +9,8 @@ import FormSubmitBtn from "./components/FormSubmitBtn";
 import GenderOptions from "./components/GenderOptions";
 import { FormValuesType } from "@/types/formTypes";
 
-const FETCH_URL = "";
+const FORM_DATA_POST_URL = "";
+const PROFILE_IMG_FILE_POST_URL = "";
 
 // zod validation
 const schema = z
@@ -59,9 +60,30 @@ export default function Home() {
 
   // form submit functionality
   const onSubmit: SubmitHandler<FormValuesType> = async (data) => {
-    console.log(data, "form-data");
-    //fetch
-    await fetch(FETCH_URL, {
+    // get user-profileImg-file
+    const userProfileFile = data.profileImg[0];
+
+    // remove user-profileImg-file
+    delete data.profileImg;
+
+    console.log(userProfileFile, "userProfileImg");
+    console.log(JSON.stringify(data), "form-data");
+    
+    //post form-data
+    await fetch(FORM_DATA_POST_URL, {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.errors) {
+          alert(data.errors);
+        } else {
+          console.log(data);
+        }
+      });
+    //post profile-img-file
+    await fetch(PROFILE_IMG_FILE_POST_URL, {
       method: "POST",
       body: data,
     })
