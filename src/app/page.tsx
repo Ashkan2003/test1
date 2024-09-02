@@ -4,18 +4,13 @@ import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FormData } from "@/types/formTypes";
+import ProfilePicture from "./components/ProfilePicture";
+import FormSubmitBtn from "./components/FormSubmitBtn";
+import GenderOptions from "./components/GenderOptions";
+import { json } from "stream/consumers";
 
-interface FormData {
-  fullName: string;
-  email: string;
-  date: string;
-  password: string;
-  confirmPassword: string;
-  receiveMessageCheckBox: boolean;
-  gender: "male" | "female";
-  profileImg: any;
-}
-
+// zod validation
 const schema = z
   .object({
     fullName: z
@@ -45,7 +40,6 @@ const schema = z
 export default function Home() {
   //states
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [profileSrc, setProfileSrc] = useState<string>("/imgs/Rectangle 1.svg");
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
 
@@ -64,7 +58,14 @@ export default function Home() {
 
   // form submit functionality
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    console.log(data);
+    const reader = new FileReader()
+
+
+    const formData = data;
+    const userProfileImgFile = data.profileImg[0];
+    console.log(userProfileImgFile);
+    formData.profileImg = JSON.stringify(userProfileImgFile);
+    console.log(JSON.stringify(formData));
   };
 
   // toggle the password-field visibility
@@ -77,46 +78,12 @@ export default function Home() {
     setShowConfirmPassword((showConfirmPassword) => !showConfirmPassword);
   }
 
-  // upload-file functonality
-  function handleUploadFile(event: any) {
-    const file = event.target.files[0];
-
-    const urlImage = URL.createObjectURL(file);
-
-    setProfileSrc(urlImage);
-  }
-
   return (
     <div dir="rtl" className="">
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* dashboard picture */}
-        <div className="flex justify-center py-10">
-          <div className="relative">
-            <img
-              src={profileSrc}
-              className="w-24 rounded-2xl"
-              alt="account-pic"
-            />
-            <label htmlFor="file-btn">
-              <img
-                className="absolute w-6 right-0 -bottom-1 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-[200px] transition-all cursor-pointer"
-                src="/imgs/plus-circle.svg"
-                alt="account-add-pic"
-              />
-              <input
-                type="file"
-                id="file-btn"
-                hidden
-                {...register("profileImg", {
-                  onChange(event) {
-                    handleUploadFile(event);
-                  },
-                })}
-              />
-            </label>
-          </div>
-        </div>
-        {/* dashboard form */}
+        <ProfilePicture register={register} />
+        {/* dashboard inputs */}
         <div className="flex justify-center">
           <div className="space-y-20">
             {/* inputs */}
@@ -223,48 +190,7 @@ export default function Home() {
               <div className="order-1 md:order-none">
                 <p className="pb-1">جنسیت</p>
                 <div className="flex justify-evenly md:ps-5 ">
-                  {/* male-btn */}
-                  <button
-                    type="button"
-                    className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer"
-                  >
-                    <label htmlFor="gender-option-male" className="px-5 py-2">
-                      <input
-                        value="male"
-                        type="radio"
-                        id="gender-option-male"
-                        hidden
-                        {...register("gender")}
-                      />
-                      <img
-                        src="/imgs/male.png"
-                        alt="male-pic"
-                        className="w-[40px]"
-                      />
-                      <p>مرد</p>
-                    </label>
-                  </button>
-                  {/* female-btn */}
-                  <button
-                    type="button"
-                    className="inline-flex flex-col justify-center items-center bg-slate-200 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-2xl cursor-pointer  "
-                  >
-                    <label htmlFor="gender-option-female" className="px-5 py-2">
-                      <input
-                        value="female"
-                        type="radio"
-                        id="gender-option-female"
-                        hidden
-                        {...register("gender")}
-                      />
-                      <img
-                        src="/imgs/female.png"
-                        alt="male-pic"
-                        className="w-[40px]"
-                      />
-                      <p>زن</p>
-                    </label>
-                  </button>
+                  <GenderOptions register={register} />
                 </div>
               </div>
               {/* confirm-password-field */}
@@ -346,12 +272,7 @@ export default function Home() {
             </div>
             {/* form-btn */}
             <div className="flex pb-11 justify-center">
-              <button
-                className="border-none bg-cyan-600 hover:bg-cyan-700 transition-all focus:ring focus:ring-cyan-900 text-white px-28 py-2 rounded-md"
-                type="submit"
-              >
-                ذخیره
-              </button>
+              <FormSubmitBtn />
             </div>
           </div>
         </div>

@@ -1,44 +1,45 @@
-import React, { useRef, useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import React, { useState } from "react";
 
-const ProfilePicture = ({ register }) => {
-  const hiddenInputRef = useRef();
+interface Props {
+  register: any;
+}
 
-  const { ref: registerRef, ...rest } = register("profilePicture");
+const ProfilePicture = ({ register }: Props) => {
+  //states
+  const [profileSrc, setProfileSrc] = useState<string>("/imgs/Rectangle 1.svg");
 
-  const [preview, setPreview] = useState();
-
-  const handleUploadedFile = (event) => {
+  // upload-file functonality
+  function handleUploadFile(event: any) {
     const file = event.target.files[0];
 
     const urlImage = URL.createObjectURL(file);
 
-    setPreview(urlImage);
-  };
-
-  const onUpload = () => {
-    hiddenInputRef.current.click();
-  };
-
-  const uploadButtonLabel = preview ? "Change image" : "Upload image";
+    setProfileSrc(urlImage);
+  }
 
   return (
-    <div>
-      <label>Profile picture</label>
-
-      <input
-        type="file"
-        name="profilePicture"
-        {...rest}
-        onChange={handleUploadedFile}
-        ref={(e) => {
-          registerRef(e);
-          hiddenInputRef.current = e;
-        }}
-      />
-
-      <img src={preview} sx={{ width: 80, height: 80 }} />
-
-      <button onClick={onUpload}>{uploadButtonLabel}</button>
+    <div className="flex justify-center py-10">
+      <div className="relative">
+        <img src={profileSrc} className="w-24 rounded-2xl" alt="account-pic" />
+        <label htmlFor="file-btn">
+          <img
+            className="absolute w-6 right-0 -bottom-1 hover:outline hover:outline-yellow-400 focus:ring focus:ring-yellow-400 rounded-[200px] transition-all cursor-pointer"
+            src="/imgs/plus-circle.svg"
+            alt="account-add-pic"
+          />
+          <input
+            type="file"
+            id="file-btn"
+            hidden
+            {...register("profileImg", {
+              onChange(event:any) {
+                handleUploadFile(event);
+              },
+            })}
+          />
+        </label>
+      </div>
     </div>
   );
 };
