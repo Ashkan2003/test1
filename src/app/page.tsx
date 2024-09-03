@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { object, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ProfilePicture from "./components/ProfilePicture";
 import FormSubmitBtn from "./components/FormSubmitBtn";
@@ -11,7 +11,7 @@ import { FormValuesType } from "@/types/formTypes";
 
 const FORM_DATA_POST_URL = "";
 const PROFILE_IMG_FILE_POST_URL = "";
-
+const DEBOUNCING_DELAY = 1500;
 // zod validation
 const schema = z
   .object({
@@ -51,6 +51,8 @@ export default function Home() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValuesType>({
+    mode: "onChange",
+    delayError: DEBOUNCING_DELAY,
     defaultValues: {
       receiveMessageCheckBox: false,
       gender: "male",
@@ -68,7 +70,7 @@ export default function Home() {
 
     console.log(userProfileFile, "userProfileImg");
     console.log(JSON.stringify(data), "form-data");
-    
+
     //post form-data
     await fetch(FORM_DATA_POST_URL, {
       method: "POST",
